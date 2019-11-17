@@ -4,9 +4,6 @@ import threading
 import arxiv
 
 
-
-
-
 class MainApplication(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__()
@@ -28,7 +25,7 @@ class MainApplication(QtWidgets.QMainWindow):
 
         # Create tabs widget
         self.tabs_widget = QtWidgets.QTabWidget()
-        self.tabs_widget.setUsesScrollButtons(False)     
+        self.tabs_widget.setUsesScrollButtons(False)
         self.tab_names = ['New', 'Readed', 'Deleted']
 
         for tab_name in self.tab_names:
@@ -53,7 +50,7 @@ class MainApplication(QtWidgets.QMainWindow):
                 new_papers += 1
         self.local_library.save()
         self.local_library.print()
-    
+
     def closeEvent(self, event):
         event.accept()
         self.timer.cancel()
