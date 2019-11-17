@@ -3,20 +3,20 @@ import threading
 import arxiv
 
 
-local_library_path = 'library'
-periodicity = 300
-
-
 class LocalLibrary():
-    def __init__(self, loacal_library_path):
+    def __init__(self, local_library_path='library'):
         self.path = local_library_path
         self.load()
 
     def load(self):
         try:
             self.data = pickle.load(open(self.path, 'rb'))
+            self.papers = self.data['papers']
+            self.papers_ids = self.data['ids']
         except FileNotFoundError or EOFError:
             self.data = {'ids': [], 'papers': []}
+            self.papers = self.data['papers']
+            self.papers_ids = self.data['ids']
             self.save()
 
     def save(self):
@@ -24,12 +24,13 @@ class LocalLibrary():
         self.load()
 
     def add_paper(self, paper):
-        self.data['ids'].append(paper.id_numb)
-        self.data['papers'].append(paper)
+        self.papers_ids.append(paper.id_numb)
+        self.papers.append(paper)
 
     def print(self):
         for paper in self.data['papers']:
             print(paper.title)
+
 
 class Paper():
     def __init__(self, paper_form):
@@ -46,17 +47,14 @@ class Paper():
 
     def change_status(self, status):
         self.status = status
-    
-
-local_library = LocalLibrary(local_library_path)
 
 
-def periodical_query():
-    arxiv_query()
+def periodical_query(local_library, periodicity=3):
+    arxiv_query(local_library)
     threading.Timer(periodicity, periodical_query).start()
 
 
-def arxiv_query():
+def arxiv_query(local_library):
     resutls = arxiv.query('astro-ph.HE', max_results=10, sort_by='submittedDate')
     for paper_form in resutls:
         new_papers = 0
@@ -66,6 +64,3 @@ def arxiv_query():
     local_library.save()
     local_library.print()
     return resutls
-
-
-periodical_query()
