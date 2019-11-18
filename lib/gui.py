@@ -21,12 +21,6 @@ class MainApplication(QtWidgets.QMainWindow):
         self.setGeometry(200, 200, 1000, 600)
         self.setMinimumSize(700, 500)
 
-        # Create containers
-        self.footer = QtWidgets.QVBoxLayout()
-        # self.tabs_hbox = QtWidgets.QHBoxLayout()
-        # self.sort_hbox = QtWidgets.QHBoxLayout()
-        # self.list_vbox = QtWidgets.QVBoxLayout()
-
         # Create tabs widget
         self.tabs_widget = MainTabsWidget(self.local_library)
         self.setCentralWidget(self.tabs_widget)
@@ -53,7 +47,7 @@ class MainApplication(QtWidgets.QMainWindow):
         self.timer.start()
 
     def arxiv_query(self):
-        results = arxiv.query('astro-ph.HE', max_results=10, sort_by='submittedDate')
+        results = arxiv.query('astro-ph.HE', max_results=30, sort_by='submittedDate')
         if results:
             for paper_form in results:
                 new_papers = 0
@@ -65,7 +59,6 @@ class MainApplication(QtWidgets.QMainWindow):
             self.local_library.update_time(time.localtime())
             self.status_bar.showMessage('Last update: ' + time.strftime('%H:%M  %b %d', self.local_library.last_update_time))
             self.local_library.save()
-            self.local_library.print()
 
     def closeEvent(self, event):
         event.accept()
@@ -76,18 +69,11 @@ class MainTabsWidget(QtWidgets.QTabWidget):
     def __init__(self, local_library):
         super(MainTabsWidget, self).__init__()
         self.local_library = local_library
-        self.installEventFilter(self)
         self.setUsesScrollButtons(False)
         self.tab_names = ['New', 'Read', 'Deleted']
         self.tab_roles = ['new', 'read', 'deleted']
         for tab_name in self.tab_names:
             self.addTab(TableView(tab_name, self), tab_name)
-
-    def eventFilter(self, QObject, event):
-        if event.type() == QtCore.QEvent.MouseButtonPress:
-            if event.button() == QtCore.Qt.RightButton:
-                print("Right button clicked")
-        return False
 
 
 class TableView(QtWidgets.QTableView):
@@ -166,7 +152,6 @@ class TableView(QtWidgets.QTableView):
 class LocalLibrary():
     def __init__(self, local_library_path):
         self.path = local_library_path
-        print(self.path)
         self.load()
 
     def load(self):
@@ -202,6 +187,7 @@ class LocalLibrary():
 
     def update_time(self, time):
         self.last_update_time = time
+        self.data['last_update_time'] = time
 
 
 class Paper():
