@@ -4,6 +4,7 @@ import time
 import pickle
 import threading
 import arxiv
+import webbrowser
 from os import getcwd
 
 
@@ -113,19 +114,22 @@ class TableView(QtWidgets.QTableView):
             cmenu = QtWidgets.QMenu(self)
             cmenu.addAction("Mark as read", lambda: self.mark_as_read())
             cmenu.addAction("Delete", lambda: self.delete())
+            cmenu.addAction("Open in browser", lambda: self.open_in_browser())
             cmenu.exec_(self.mapToGlobal(event.pos()))
         if self.name == 'Read':
             cmenu = QtWidgets.QMenu(self)
             cmenu.addAction("Mark as new", lambda: self.mark_as_new())
             cmenu.addAction("Delete", lambda: self.delete())
+            cmenu.addAction("Open in browser", lambda: self.open_in_browser())
             cmenu.exec_(self.mapToGlobal(event.pos()))
         if self.name == 'Deleted':
             cmenu = QtWidgets.QMenu(self)
             cmenu.addAction("Mark as read", lambda: self.mark_as_read())
             cmenu.addAction("Mark as new", lambda: self.mark_as_new())
             cmenu.addAction("Delete", lambda: self.delete())
+            cmenu.addAction("Open in browser", lambda: self.open_in_browser())
             cmenu.exec_(self.mapToGlobal(event.pos()))
-
+            
     def mark_as_new(self):
         selected_rows = [x.row() for x in self.selectionModel().selectedRows()][::-1]
         for row in selected_rows:
@@ -153,6 +157,11 @@ class TableView(QtWidgets.QTableView):
         self.clearSelection()
         self.main_tab_widget.local_library.save()
 
+    def open_in_browser(self):
+        selected_rows = [x for x in self.selectionModel().selectedRows()]
+        for row in selected_rows:
+            paper = self.main_tab_widget.local_library.find_paper_by_title(self.model().itemFromIndex(row).text())
+            webbrowser.open(paper.arxiv_url)
 
 class LocalLibrary():
     def __init__(self, local_library_path):
